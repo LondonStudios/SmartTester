@@ -4,9 +4,14 @@
 View a demonstration video [here](https://www.youtube.com/watch?v=V2v2rFwmvRg&feature=youtu.be).
 
 If you enjoy my work, feel free to **buy me a coffee**.
+
 <a href="https://www.buymeacoffee.com/londonstudios" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/arial-orange.png" alt="Buy Me A Coffee" style="height: 31px !important;width: 197px !important;" ></a>
 
+If you enjoy my plugins, buy me a coffee!
+Join our **discord** [here](https://discord.gg/AtPt9ND).
+
 This plugin is made by LondonStudios, we have created a variety of releases including TaserFramework, SearchHandler, ActivateAlarm and more!
+
 
 ![SmartTester](https://i.imgur.com/EjhZL4h.png)
 
@@ -42,9 +47,6 @@ For example, if you want to remove the delay, change 90 to 0. You can change the
 
 ## Source Code
 Please find the source code in the **"src"** folder. Please ensure you follow the licence in **"LICENCE.md"**.
-
-## Discord
-<iframe src="https://discordapp.com/widget?id=710224003054436394&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>
 
 ## Feedback
 We appreciate feedback, bugs and suggestions related to SmartTester and future plugins. We hope you enjoy using the resource and look forward to hearing from people!
