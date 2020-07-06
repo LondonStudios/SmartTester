@@ -16,8 +16,8 @@ This plugin is made by LondonStudios, we have created a variety of releases incl
 ![SmartTester](https://i.imgur.com/EjhZL4h.png)
 
 ## Usage
-**/breathalyse [PlayerId]** - Takes a sample of breath from another player.
-**/drugalyse [PlayerId]** - Takes a saliva sample from another player.
+**/breathalyse** - Takes a sample of breath from the nearest player.
+**/drugalyse** - Takes a saliva sample from the nearest player.
 **/setbreath [result]** - If you are being breathalysed, you'll be prompted in chat to use this command.
 **/setdrug [Cannabis (true/false) Cocaine (true/false)]** - If you are being drugalysed, you'll be prompted in chat to use this command. eg, /setdrug true true
 **/failprovide** - If you are being sampled, this will fail to provide and the officer will be notified.
