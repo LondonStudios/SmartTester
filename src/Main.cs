@@ -12,7 +12,7 @@ namespace SmartTesting
     public class Main : BaseScript
     {
         public string bUnit;
-        public int bLimit;
+        public float bLimit;
         public string dUnit;
         public string d1;
         public string d2;
@@ -20,7 +20,7 @@ namespace SmartTesting
 
         public bool awaitingBreath;
         public int requestId;
-        public int breath;
+        public float breath;
 
         public int[] breathColour = { 235, 171, 52 };
         public int[] drugColour = { 52, 168, 235 };
@@ -28,8 +28,17 @@ namespace SmartTesting
         public bool awaitingDrug;
         public int drugRequestId;
         public bool sent = false;
+
+        public int playerLoop = 64;
+
+        public Dictionary<int, int> siren_luxstate = new Dictionary<int, int> { };
         public Main()
         {
+            if (GetConvar("onesync_enabled", "true") == "true")
+            {
+                playerLoop = 256;
+            }
+
             ReadConfig();
 
             EventHandlers["Client:RequestDrug"] += new Action<int, int, Vector3>((local, request, location) =>
@@ -140,14 +149,14 @@ namespace SmartTesting
                             TriggerEvent("chat:addMessage", new
                             {
                                 color = breathColour,
-                                args = new[] { "[Breathalyser]", "You are being breathalysed. Use /setbreath or /failprovide." }
+                                args = new[] { "[Breathalyser]", "You are being breathalysed. Use /setbreath [Amount] or /failprovide." }
                             });
                         }
                     }
                 }
             });
 
-            EventHandlers["Client:ReturnBreath"] += new Action<int, int, int, bool, bool>((local, request, breathresult, failprovide, success) =>
+            EventHandlers["Client:ReturnBreath"] += new Action<int, int, float, bool, bool>((local, request, breathresult, failprovide, success) =>
             {
                 if (request == GetPlayerServerId(PlayerId()))
                 {
@@ -222,8 +231,8 @@ namespace SmartTesting
                 {
                     if (awaitingBreath)
                     {
-                        int result;
-                        var successful = int.TryParse(Convert.ToString(args[0]), out result);
+                        float result;
+                        var successful = float.TryParse(Convert.ToString(args[0]), out result);
                         if (successful)
                         {
                             breath = result;
@@ -313,44 +322,11 @@ namespace SmartTesting
 
             RegisterCommand("breathalyse", new Action<int, List<object>, string>((source, args, raw) =>
             {
-                if (IsStringNullOrEmpty(Convert.ToString(args[0])))
+                var target = Raycast();
+                if (IsEntityAPed(target))
                 {
-                    TriggerEvent("chat:addMessage", new
-                    {
-                        color = breathColour,
-                        args = new[] { "[Breathalyser]", $"Usage /breathalyse [playerID]." }
-                    });
-                }
-                else
-                {
-                    if (sent == false)
-                    {
-                        Screen.ShowNotification("~b~SmartTester ~w~made by London Studios.");
-                        sent = true;
-                    }
-                    int targetId;
-                    var successful = Int32.TryParse(Convert.ToString(args[0]), out targetId);
-                    if (targetId == GetPlayerServerId(PlayerId()) || successful == false)
-                    {
-                        PlaySoundFrontend(-1, "Place_Prop_Fail", "DLC_Dmod_Prop_Editor_Sounds", false);
-                        if (successful == false)
-                        {
-                            TriggerEvent("chat:addMessage", new
-                            {
-                                color = breathColour,
-                                args = new[] { "[Breathalyser]", $"Invalid ID" }
-                            });
-                        }
-                        else
-                        {
-                            TriggerEvent("chat:addMessage", new
-                            {
-                                color = breathColour,
-                                args = new[] { "[Breathalyser]", $"You cannot breathalyse yourself." }
-                            });
-                        }
-                    }
-                    else
+                    var server = GetPlayerServerId(GetPlayer(target));
+                    if (!(server == -1))
                     {
                         RequestDictionary("weapons@first_person@aim_rng@generic@projectile@shared@core");
                         TaskPlayAnim(GetPlayerPed(PlayerId()), "weapons@first_person@aim_rng@generic@projectile@shared@core", "idlerng_med", 1.0f, -1, 10000, 50, 0, false, false, false);
@@ -359,51 +335,26 @@ namespace SmartTesting
                             color = breathColour,
                             args = new[] { "[Breathalyser]", $"You are now breathalysing the suspect." }
                         });
-                        TriggerServerEvent("Server:RequestBreath", targetId, GetPlayerServerId(PlayerId()), GetEntityCoords(PlayerPedId(), true));
+                        TriggerServerEvent("Server:RequestBreath", server, GetPlayerServerId(PlayerId()), GetEntityCoords(PlayerPedId(), true));
                     }
+                }
+                else
+                {
+                    TriggerEvent("chat:addMessage", new
+                    {
+                        color = breathColour,
+                        args = new[] { "[Breathalyser]", $"No player found" }
+                    });
                 }
             }), false);
 
             RegisterCommand("drugalyse", new Action<int, List<object>, string>((source, args, raw) =>
             {
-                if (IsStringNullOrEmpty(Convert.ToString(args[0])))
+                var target = Raycast();
+                if (IsEntityAPed(target))
                 {
-                    TriggerEvent("chat:addMessage", new
-                    {
-                        color = drugColour,
-                        args = new[] { "[Drugalyser]", $"Usage /drugalyse [playerID]." }
-                    });
-                }
-                else
-                {
-                    if (sent == false)
-                    {
-                        Screen.ShowNotification("~b~SmartTester ~w~made by London Studios.");
-                        sent = true;
-                    }
-                    int targetId;
-                    var successful = Int32.TryParse(Convert.ToString(args[0]), out targetId);
-                    if (targetId == GetPlayerServerId(PlayerId()) || successful == false)
-                    {
-                        PlaySoundFrontend(-1, "Place_Prop_Fail", "DLC_Dmod_Prop_Editor_Sounds", false);
-                        if (successful == false)
-                        {
-                            TriggerEvent("chat:addMessage", new
-                            {
-                                color = drugColour,
-                                args = new[] { "[Drugalyser]", $"Invalid ID" }
-                            });
-                        }
-                        else
-                        {
-                            TriggerEvent("chat:addMessage", new
-                            {
-                                color = drugColour,
-                                args = new[] { "[Drugalyser]", $"You cannot drugalyse yourself." }
-                            });
-                        }
-                    }
-                    else
+                    var server = GetPlayerServerId(GetPlayer(target));
+                    if (!(server == -1))
                     {
                         RequestDictionary("weapons@first_person@aim_rng@generic@projectile@shared@core");
                         TaskPlayAnim(GetPlayerPed(PlayerId()), "weapons@first_person@aim_rng@generic@projectile@shared@core", "idlerng_med", 1.0f, -1, 10000, 50, 0, false, false, false);
@@ -412,8 +363,16 @@ namespace SmartTesting
                             color = drugColour,
                             args = new[] { "[Drugalyser]", $"You are now drugalysing the suspect." }
                         });
-                        TriggerServerEvent("Server:RequestDrug", targetId, GetPlayerServerId(PlayerId()), GetEntityCoords(PlayerPedId(), true));
+                        TriggerServerEvent("Server:RequestDrug", server, GetPlayerServerId(PlayerId()), GetEntityCoords(PlayerPedId(), true));
                     }
+                }
+                else
+                {
+                    TriggerEvent("chat:addMessage", new
+                    {
+                        color = drugColour,
+                        args = new[] { "[Drugalyser]", $"No player found." }
+                    });
                 }
             }), false);
 
@@ -428,18 +387,12 @@ namespace SmartTesting
                 new { name=$"{d2}", help="true/false" },
             });
 
-            TriggerEvent("chat:addSuggestion", "/breathalyse", "Breathalyse another player", new[]
-            {
-                new { name="Player ID", help="Target player breathalyse ID" },
-            });
+            TriggerEvent("chat:addSuggestion", "/breathalyse", "Breathalyse the nearest player");
 
-            TriggerEvent("chat:addSuggestion", "/drugalyse", "Drugalyse another player", new[]
-            {
-                new { name="Player ID", help="Target player drugalyse ID" },
-            });
 
-            TriggerEvent("chat:addSuggestion", "/failprovide", "Fails to provide a sample");
+            TriggerEvent("chat:addSuggestion", "/drugalyse", "Drugalyse the nearest player");
 
+            TriggerEvent("chat:addSuggestion", "/failprovide", "Fail to provide a sample");
         }
 
         private void ReadConfig()
@@ -449,7 +402,7 @@ namespace SmartTesting
             {
                 Configuration loaded = Configuration.LoadFromString(data);
                 bUnit = loaded["SmartTesting"]["breathalyserUnit"].StringValue;
-                bLimit = loaded["SmartTesting"]["breathalyserLimit"].IntValue;
+                bLimit = loaded["SmartTesting"]["breathalyserLimit"].FloatValue;
                 d1 = loaded["SmartTesting"]["drugalyserDrug1"].StringValue;
                 d2 = loaded["SmartTesting"]["drugalyserDrug2"].StringValue;
                 dDelay = 1000 * loaded["SmartTesting"]["drugalyserDelay"].IntValue;
@@ -521,5 +474,30 @@ namespace SmartTesting
                 }
             }
         }
+
+        private int Raycast()
+        {
+            var location = GetEntityCoords(PlayerPedId(), true);
+            var offSet = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0f, 2.0f, 0.0f);
+            var shapeTest = StartShapeTestCapsule(location.X, location.Y, location.Z, offSet.X, offSet.Y, offSet.Z, 1.0f, 12, PlayerPedId(), 7);
+            bool hit = false;
+            Vector3 endCoords = new Vector3(0f, 0f, 0f);
+            Vector3 surfaceNormal = new Vector3(0f, 0f, 0f);
+            int entityHit = 0;
+            var result = GetShapeTestResult(shapeTest, ref hit, ref endCoords, ref surfaceNormal, ref entityHit);
+            return entityHit;
+        }
+
+        private int GetPlayer(int player)
+        {
+            for (int i = 0; i < playerLoop; i++)
+            {
+                if (GetPlayerPed(i) == player)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        } 
     }
 }

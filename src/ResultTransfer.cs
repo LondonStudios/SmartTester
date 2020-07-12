@@ -17,7 +17,7 @@ namespace Server
                 TriggerClientEvent("Client:RequestBreath", local, request, location);
             });
 
-            EventHandlers["Server:ReturnBreath"] += new Action<int, int, int, bool, bool>((local, request, breath, failprovide, success) =>
+            EventHandlers["Server:ReturnBreath"] += new Action<int, int, float, bool, bool>((local, request, breath, failprovide, success) =>
             {
                 TriggerClientEvent("Client:ReturnBreath", local, request, breath, failprovide, success);
             });
